@@ -5,6 +5,7 @@ import typer
 from typing_extensions import Annotated
 
 from photokinthesis.utils import reorganize_fast_foto, deduplicate_photos
+from photokinthesis.collections import init_collection
 
 app = typer.Typer(
     help="photokinthesis - Photo organization toolkit",
@@ -95,6 +96,72 @@ def dedup(
     typer.echo(f"Total images processed: {stats['total']}")
     typer.echo(f"Unique images kept: {stats['kept']}")
     typer.echo(f"Duplicates removed: {stats['duplicates']}")
+
+
+@app.command(name="init-collection")
+def init_collection_cmd(
+    reorganized_dir: Annotated[
+        Path,
+        typer.Option(
+            "--reorganized-dir",
+            help="Directory containing fronts/, enhanced_fronts/, and backs/ subdirectories",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+        ),
+    ],
+    collection_name: Annotated[
+        str,
+        typer.Option(
+            "--collection-name",
+            help="Name of the collection",
+        ),
+    ],
+    collection_xmp_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-xmp-dir",
+            help="Root directory for collection XMP files",
+        ),
+    ],
+    collection_image_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-image-dir",
+            help="Root directory for collection image files",
+        ),
+    ],
+    tag: Annotated[
+        list[str],
+        typer.Option(
+            "--tag",
+            help="XMP tag in format 'namespace:name=value' (e.g., 'dc:creator=John Doe'). Can be specified multiple times.",
+        ),
+    ] = None,
+) -> None:
+    """Initialize a new photo collection with XMP metadata."""
+    typer.echo(f"Initializing collection: {collection_name}")
+    typer.echo(f"Source directory: {reorganized_dir}")
+    typer.echo(f"Image directory: {collection_image_dir}")
+    typer.echo(f"XMP directory: {collection_xmp_dir}")
+
+    # Parse tags from key=value format
+    tags_dict = {}
+    if tag:
+        for tag_str in tag:
+            if "=" not in tag_str:
+                typer.echo(f"Error: Tag must be in format 'key=value', got: {tag_str}")
+                raise typer.Exit(1)
+            key, value = tag_str.split("=", 1)
+            tags_dict[key] = value
+            typer.echo(f"  Tag: {key} = {value}")
+
+    init_collection(
+        reorganized_dir, collection_name, collection_xmp_dir, collection_image_dir, tags_dict
+    )
+
+    typer.echo("\nCollection initialized successfully!")
 
 
 if __name__ == "__main__":
