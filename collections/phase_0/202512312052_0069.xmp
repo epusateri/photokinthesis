@@ -1,8 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<x:xmpmeta xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:x="adobe:ns:meta/" x:xmptk="Python XMP Toolkit">
+<x:xmpmeta xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:mwg-rs="http://www.metadataworkinggroup.com/schemas/regions/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:stArea="http://ns.adobe.com/xmp/sType/Area#" xmlns:x="adobe:ns:meta/" x:xmptk="Python XMP Toolkit">
   <rdf:RDF>
     <rdf:Description rdf:about="">
       <dc:source>Ellen (Deichler) Pusateri</dc:source>
+    </rdf:Description>
+    <rdf:Description rdf:about="">
+      <mwg-rs:Regions>
+        <mwg-rs:RegionList>
+          <rdf:Seq>
+            <rdf:li>
+              <mwg-rs:Area>
+                <stArea:x>0.242574</stArea:x>
+                <stArea:y>0.425785</stArea:y>
+                <stArea:w>0.049505</stArea:w>
+                <stArea:h>0.094996</stArea:h>
+                <stArea:unit>normalized</stArea:unit>
+              </mwg-rs:Area>
+              <mwg-rs:Name>Unknown</mwg-rs:Name>
+              <mwg-rs:Type>Face</mwg-rs:Type>
+            </rdf:li>
+            <rdf:li>
+              <mwg-rs:Area>
+                <stArea:x>0.363133</stArea:x>
+                <stArea:y>0.413486</stArea:y>
+                <stArea:w>0.044846</stArea:w>
+                <stArea:h>0.083969</stArea:h>
+                <stArea:unit>normalized</stArea:unit>
+              </mwg-rs:Area>
+              <mwg-rs:Name>Unknown</mwg-rs:Name>
+              <mwg-rs:Type>Face</mwg-rs:Type>
+            </rdf:li>
+            <rdf:li>
+              <mwg-rs:Area>
+                <stArea:x>0.460396</stArea:x>
+                <stArea:y>0.329092</stArea:y>
+                <stArea:w>0.048340</stArea:w>
+                <stArea:h>0.091603</stArea:h>
+                <stArea:unit>normalized</stArea:unit>
+              </mwg-rs:Area>
+              <mwg-rs:Name>Unknown</mwg-rs:Name>
+              <mwg-rs:Type>Face</mwg-rs:Type>
+            </rdf:li>
+            <rdf:li>
+              <mwg-rs:Area>
+                <stArea:x>0.690157</stArea:x>
+                <stArea:y>0.392282</stArea:y>
+                <stArea:w>0.046593</stArea:w>
+                <stArea:h>0.083969</stArea:h>
+                <stArea:unit>normalized</stArea:unit>
+              </mwg-rs:Area>
+              <mwg-rs:Name>Unknown</mwg-rs:Name>
+              <mwg-rs:Type>Face</mwg-rs:Type>
+            </rdf:li>
+            <rdf:li>
+              <mwg-rs:Area>
+                <stArea:x>0.605416</stArea:x>
+                <stArea:y>0.421120</stArea:y>
+                <stArea:w>0.041351</stArea:w>
+                <stArea:h>0.078880</stArea:h>
+                <stArea:unit>normalized</stArea:unit>
+              </mwg-rs:Area>
+              <mwg-rs:Name>Unknown</mwg-rs:Name>
+              <mwg-rs:Type>Face</mwg-rs:Type>
+            </rdf:li>
+          </rdf:Seq>
+        </mwg-rs:RegionList>
+      </mwg-rs:Regions>
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>

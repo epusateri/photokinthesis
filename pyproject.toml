@@ -12,6 +12,12 @@ dependencies = [
     "typer[all]>=0.9.0",
     "imagehash>=4.3.0",
     "Pillow>=10.0.0",
+    "mediapipe>=0.10.0",
+    "opencv-python>=4.5.0",
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "mtcnn>=0.1.1",
+    "tensorflow>=2.13.0",
 ]
 
 [project.scripts]

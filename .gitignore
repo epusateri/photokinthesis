@@ -44,3 +44,10 @@ uv.lock
 
 # Output directories
 output/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+src/photokinthesis/web/static/*
+!src/photokinthesis/web/static/.gitkeep

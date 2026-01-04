@@ -6,6 +6,7 @@ from typing_extensions import Annotated
 
 from photokinthesis.utils import reorganize_fast_foto, deduplicate_photos
 from photokinthesis.collections import init_collection
+from photokinthesis.facial_recognition import recognize_faces
 
 app = typer.Typer(
     help="photokinthesis - Photo organization toolkit",
@@ -162,6 +163,107 @@ def init_collection_cmd(
     )
 
     typer.echo("\nCollection initialized successfully!")
+
+
+@app.command(name="recognize-faces")
+def recognize_faces_cmd(
+    collection_xmp_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-xmp-dir",
+            help="Root directory for collection XMP files",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+        ),
+    ],
+    collection_name: Annotated[
+        str,
+        typer.Option(
+            "--collection-name",
+            help="Name of the collection",
+        ),
+    ],
+    collection_image_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-image-dir",
+            help="Root directory for collection image files",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+        ),
+    ],
+) -> None:
+    """Detect faces in collection images and add face regions to XMP metadata."""
+    typer.echo(f"Recognizing faces in collection: {collection_name}")
+    typer.echo(f"XMP directory: {collection_xmp_dir}")
+    typer.echo(f"Image directory: {collection_image_dir}")
+
+    recognize_faces(collection_xmp_dir, collection_name, collection_image_dir)
+
+    typer.echo("\nFace recognition complete!")
+
+
+@app.command()
+def serve(
+    collection_xmp_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-xmp-dir",
+            help="Root directory for collection XMP files",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+        ),
+    ],
+    collection_image_dir: Annotated[
+        Path,
+        typer.Option(
+            "--collection-image-dir",
+            help="Root directory for collection image files",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+        ),
+    ],
+    host: Annotated[
+        str,
+        typer.Option(
+            "--host",
+            help="Host to bind the web server to",
+        ),
+    ] = "0.0.0.0",
+    port: Annotated[
+        int,
+        typer.Option(
+            "--port",
+            help="Port to run the web server on",
+        ),
+    ] = 5000,
+    debug: Annotated[
+        bool,
+        typer.Option(
+            "--debug/--no-debug",
+            help="Enable debug mode",
+        ),
+    ] = False,
+) -> None:
+    """Start the web GUI server for browsing photo collections."""
+    from photokinthesis.web.app import create_app
+
+    typer.echo(f"Starting Photokinthesis web server...")
+    typer.echo(f"XMP directory: {collection_xmp_dir}")
+    typer.echo(f"Image directory: {collection_image_dir}")
+    typer.echo(f"Server: http://{host}:{port}")
+    typer.echo(f"\nPress Ctrl+C to stop the server\n")
+
+    app = create_app(collection_xmp_dir, collection_image_dir)
+    app.run(host=host, port=port, debug=debug)
 
 
 if __name__ == "__main__":
