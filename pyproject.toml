@@ -1,0 +1,19 @@
+[project]
+name = "photokinthesis"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ernie Pusateri", email = "erniep@gmail.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "typer>=0.21.1",
+]
+
+[project.scripts]
+pk = "photokinthesis.cli:pk"
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
