@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photokinthesis</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Collection loader section */
+        .loader {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .loader label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .loader input {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .loader button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .loader button:hover {
+            background-color: #0056b3;
+        }
+
+        .loader button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Status message */
+        #status {
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        #status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        #status.loading {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Photokinthesis</h1>
+
+    <!-- Collection loader -->
+    <div class="loader">
+        <label for="collection-path">Collection Directory Path</label>
+        <input type="text" id="collection-path" placeholder="Enter collection directory path..." value="output/collections/ellen_pusateris_photos/0000">
+        <button id="load-button" onclick="loadCollection()">Load Collection</button>
+    </div>
+
+    <!-- Status message -->
+    <div id="status">Enter a collection path and click "Load Collection"</div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

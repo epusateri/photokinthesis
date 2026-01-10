@@ -1,14 +1,43 @@
+from __future__ import annotations
+
 import json
 import uuid
+from io import BytesIO
 from pathlib import Path
+
+from PIL import Image, ImageOps
+
+from photokinthesis.photo import Photo
+
+
+def _normalize_image(image_bytes: bytes) -> bytes:
+    """Apply EXIF orientation to pixels and return clean image bytes.
+
+    This reads the EXIF orientation tag, rotates/flips the image pixels
+    accordingly, and returns a new JPEG with no EXIF orientation tag.
+    """
+    img = Image.open(BytesIO(image_bytes))
+    img = ImageOps.exif_transpose(img)
+
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=95)
+    return buffer.getvalue()
 
 
 class Collection:
     """Represents a collection of photos."""
 
-    def __init__(self, data: dict) -> None:
-        self._name = data["name"]
-        self._photos = data["photos"]
+    def __init__(self, name: str, photos: list[Photo]) -> None:
+        self._name = name
+        self._photos = photos
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def photos(self) -> list[Photo]:
+        return self._photos
 
     @staticmethod
     def read(path: Path) -> "Collection":
@@ -16,19 +45,24 @@ class Collection:
             data = json.load(f)
 
         photos = []
-        for photo in data["photos"]:
+        for photo_data in data["photos"]:
             images = {
-                "front": (path / photo["images"]["front"]).read_bytes(),
-                "back": (path / photo["images"]["back"]).read_bytes() if "back" in photo["images"] else None,
-                "enhanced_front": (path / photo["images"]["enhanced_front"]).read_bytes() if "enhanced_front" in photo["images"] else None,
+                "front": (path / photo_data["images"]["front"]).read_bytes(),
+                "back": (path / photo_data["images"]["back"]).read_bytes() if "back" in photo_data["images"] else None,
+                "enhanced_front": (path / photo_data["images"]["enhanced_front"]).read_bytes() if "enhanced_front" in photo_data["images"] else None,
+                "thumbnail": (path / photo_data["images"]["thumbnail"]).read_bytes() if "thumbnail" in photo_data["images"] else None,
+                "front_orientation": photo_data["images"].get("front_orientation", 0),
+                "back_orientation": photo_data["images"].get("back_orientation", 0),
+                "enhanced_front_orientation": photo_data["images"].get("enhanced_front_orientation", 0),
             }
-            photos.append({
-                "id": photo["id"],
+            photo = Photo({
+                "id": photo_data["id"],
                 "images": images,
-                "source_filenames": photo["source_filenames"],
+                "source_filenames": photo_data["source_filenames"],
             })
+            photos.append(photo)
 
-        return Collection({"name": data["name"], "photos": photos})
+        return Collection(data["name"], photos)
 
     @staticmethod
     def read_fast_foto_tree(path: Path, name: str) -> "Collection":
@@ -36,15 +70,15 @@ class Collection:
         groups: dict[Path, dict[str, Path]] = {}
 
         for file in path.glob("**/*.jpg"):
-            name = file.stem
-            if name.endswith("_a"):
-                basename = name[:-2]
+            stem = file.stem
+            if stem.endswith("_a"):
+                basename = stem[:-2]
                 key = "enhanced_front"
-            elif name.endswith("_b"):
-                basename = name[:-2]
+            elif stem.endswith("_b"):
+                basename = stem[:-2]
                 key = "back"
             else:
-                basename = name
+                basename = stem
                 key = "front"
 
             # Use parent directory + basename as unique key
@@ -53,25 +87,28 @@ class Collection:
                 groups[group_key] = {}
             groups[group_key][key] = file
 
-        # Build photo data list
+        # Build Photo objects
         photos = []
         for group_key, files in sorted(groups.items()):
             if "front" not in files:
                 continue  # Skip incomplete groups
 
+            # Normalize images by applying EXIF orientation to pixels
             images = {
-                "front": files["front"].read_bytes(),
-                "back": files["back"].read_bytes() if "back" in files else None,
-                "enhanced_front": files["enhanced_front"].read_bytes() if "enhanced_front" in files else None,
+                "front": _normalize_image(files["front"].read_bytes()),
+                "back": _normalize_image(files["back"].read_bytes()) if "back" in files else None,
+                "enhanced_front": _normalize_image(files["enhanced_front"].read_bytes()) if "enhanced_front" in files else None,
             }
 
-            photos.append({
+            photo = Photo({
                 "id": uuid.uuid4().hex[:16],
                 "images": images,
                 "source_filenames": [str(f) for f in files.values()],
             })
+            photo.add_thumbnail()
+            photos.append(photo)
 
-        return Collection({"name": name, "photos": photos})
+        return Collection(name, photos)
 
     def write(self, path: Path) -> None:
         path.mkdir(parents=True, exist_ok=True)
@@ -80,8 +117,8 @@ class Collection:
 
         photos_json = []
         for photo in self._photos:
-            photo_id = photo["id"]
-            images = photo["images"]
+            photo_id = photo.id
+            images = photo.images
 
             # Create subdirectory for this photo
             photo_dir = images_dir / photo_id
@@ -90,23 +127,32 @@ class Collection:
             # Write image files
             image_paths = {}
             front_path = f"images/{photo_id}/front.jpg"
-            (path / front_path).write_bytes(images["front"])
+            (path / front_path).write_bytes(images.front)
             image_paths["front"] = front_path
 
-            if images.get("back"):
+            if images.back:
                 back_path = f"images/{photo_id}/back.jpg"
-                (path / back_path).write_bytes(images["back"])
+                (path / back_path).write_bytes(images.back)
                 image_paths["back"] = back_path
 
-            if images.get("enhanced_front"):
+            if images.enhanced_front:
                 enhanced_path = f"images/{photo_id}/enhanced_front.jpg"
-                (path / enhanced_path).write_bytes(images["enhanced_front"])
+                (path / enhanced_path).write_bytes(images.enhanced_front)
                 image_paths["enhanced_front"] = enhanced_path
+
+            if images.thumbnail:
+                thumbnail_path = f"images/{photo_id}/thumbnail.jpg"
+                (path / thumbnail_path).write_bytes(images.thumbnail)
+                image_paths["thumbnail"] = thumbnail_path
+
+            image_paths["front_orientation"] = images.front_orientation
+            image_paths["back_orientation"] = images.back_orientation
+            image_paths["enhanced_front_orientation"] = images.enhanced_front_orientation
 
             photos_json.append({
                 "id": photo_id,
                 "images": image_paths,
-                "source_filenames": photo["source_filenames"],
+                "source_filenames": photo.source_filenames,
             })
 
         collection_data = {

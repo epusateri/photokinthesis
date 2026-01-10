@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Detail - Photokinthesis</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        /* Collection header */
+        .collection-header {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collection-header .collection-info {
+            flex: 1;
+        }
+
+        .collection-header .collection-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+
+        .collection-header .collection-path {
+            font-size: 12px;
+            color: #666;
+            font-family: monospace;
+            margin: 0;
+        }
+
+        .save-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .save-button:hover {
+            background-color: #218838;
+        }
+
+        .save-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .save-button.saving {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        /* Two-column layout */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        /* Left column - Images */
+        .images-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .image-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .image-container h3 {
+            margin: 0;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .image-container .image-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            display: block;
+        }
+
+        .image-container.not-available {
+            opacity: 0.5;
+        }
+
+        .image-container .no-image {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Right column - Metadata */
+        .metadata-column {
+            position: sticky;
+            top: 20px;
+            align-self: start;
+        }
+
+        .metadata {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .metadata h2 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .metadata .field {
+            margin-bottom: 15px;
+        }
+
+        .metadata .label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .metadata .value {
+            font-family: monospace;
+            background-color: #fff;
+            padding: 4px 8px;
+            border-radius: 2px;
+            display: block;
+            word-break: break-all;
+        }
+
+        .metadata .source-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .metadata .source-list li {
+            font-family: monospace;
+            font-size: 11px;
+            padding: 4px 8px;
+            background-color: #fff;
+            margin-bottom: 4px;
+            border-radius: 2px;
+            word-break: break-all;
+        }
+
+        /* Orientation controls */
+        .orientation-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .orientation-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .orientation-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .orientation-control.disabled {
+            opacity: 0.5;
+        }
+
+        .orientation-control .image-type {
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .orientation-control select {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .orientation-control select:disabled {
+            background-color: #eee;
+        }
+
+        /* Navigation buttons */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .navigation a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .navigation a:hover {
+            background-color: #0056b3;
+        }
+
+        .navigation a.disabled {
+            background-color: #ccc;
+            pointer-events: none;
+        }
+
+        /* Responsive: stack columns on narrow screens */
+        @media (max-width: 800px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .metadata-column {
+                position: static;
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/thumbnails" class="back-link">← Back to Collection</a>
+
+    <!-- Collection header -->
+    <div id="collection-header" class="collection-header">
+        <div class="collection-info">
+            <p class="collection-name" id="collection-name">Loading...</p>
+            <p class="collection-path" id="collection-path-display"></p>
+        </div>
+        <button id="save-button" class="save-button" onclick="saveCollection()">Save Changes</button>
+    </div>
+
+    <h1>Photo Detail</h1>
+
+    <div class="content">
+        <!-- Left column - Images -->
+        <div class="images-column" id="images-container">
+            <!-- Images will be populated by JavaScript -->
+        </div>
+
+        <!-- Right column - Metadata -->
+        <div class="metadata-column">
+            <div class="metadata">
+                <h2>Photo Information</h2>
+                <div class="field">
+                    <span class="label">ID</span>
+                    <span class="value" id="photo-id">Loading...</span>
+                </div>
+                <div class="field">
+                    <span class="label">Source Files</span>
+                    <ul class="source-list" id="source-files">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+
+                <!-- Orientation controls -->
+                <div class="orientation-section">
+                    <h3>Image Orientation</h3>
+                    <div id="orientation-controls">
+                        <!-- Controls will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="navigation">
+        <a href="#" id="prev-button" class="disabled">← Previous</a>
+        <a href="#" id="next-button" class="disabled">Next →</a>
+    </div>
+
+    <script src="/static/photo.js"></script>
+</body>
+</html>
